@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Y & Z</title>
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    
+    <!-- 配置Tailwind自定义颜色和字体 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#60A5FA',
+                        accent: '#2563EB',
+                        light: '#DBEAFE',
+                        dark: '#1E40AF'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <!-- 自定义工具类 -->
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .card-hover {
+                @apply transition-all duration-300 hover:shadow-xl hover:-translate-y-1;
+            }
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .backdrop-blur {
+                backdrop-filter: blur(8px);
+            }
+        }
+    </style>
+    
+    <style>
+        /* 平滑滚动 */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* 渐变背景动画 */
+        .bg-gradient-animated {
+            background-size: 200% 200%;
+            animation: gradient 15s ease infinite;
+        }
+        
+        @keyframes gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+        
+        /* 卡片加载动画 */
+        .card {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s forwards;
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .card:nth-child(1) { animation-delay: 0.2s; }
+        .card:nth-child(2) { animation-delay: 0.4s; }
+        .card:nth-child(3) { animation-delay: 0.6s; }
+        
+        /* 媒体预览容器 */
+        .media-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        /* 媒体项悬停效果 */
+        .media-item {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .media-item:hover {
+            transform: scale(1.03);
+        }
+        
+        /* 视频缩略图播放图标 */
+        .video-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .media-item:hover .video-overlay {
+            opacity: 1;
+        }
+        
+        /* 模态框动画 */
+        .modal {
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+        }
+        
+        .modal.active .modal-content {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="bg-blue-50 font-sans text-gray-800">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-md fixed w-full z-50 transition-all duration-300" id="navbar">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="text-2xl font-bold text-primary flex items-center">
+                <i class="fa fa-book mr-2"></i>
+                <span>Y & Z</span>
+            </div>
+            
+            <!-- 桌面导航 -->
+            <div class="hidden md:flex space-x-6">
+                <a href="#home" class="nav-link hover:text-primary transition-colors">首页</a>
+                <a href="#daily" class="nav-link hover:text-primary transition-colors">日常记录</a>
+                <a href="#tickets" class="nav-link hover:text-primary transition-colors">票据收藏</a>
+                <a href="#travel" class="nav-link hover:text-primary transition-colors">旅游</a>
+            </div>
+            
+            <!-- 移动端菜单按钮 -->
+            <button id="menu-toggle" class="md:hidden text-gray-700 focus:outline-none">
+                <i class="fa fa-bars text-xl"></i>
+            </button>
+        </div>
+        
+        <!-- 移动端导航菜单 -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white shadow-lg absolute w-full">
+            <div class="container mx-auto px-4 py-2 flex flex-col space-y-3">
+                <a href="#home" class="py-2 hover:text-primary transition-colors">首页</a>
+                <a href="#daily" class="py-2 hover:text-primary transition-colors">日常记录</a>
+                <a href="#tickets" class="py-2 hover:text-primary transition-colors">票据收藏</a>
+                <a href="#travel" class="py-2 hover:text-primary transition-colors">旅游</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 头部区域 -->
+    <header id="home" class="min-h-screen flex items-center bg-gradient-animated bg-gradient-to-r from-blue-400 to-blue-600 text-white pt-16">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-[clamp(2.5rem,8vw,4.5rem)] font-bold mb-6 text-shadow leading-tight">Y & Z</h1>
+            <p class="text-[clamp(1.25rem,3vw,1.75rem)] max-w-3xl mx-auto opacity-90 mb-12 leading-relaxed">
+                Document every highlight moment in life, collect every ticket with a tale, and preserve every unforgettable travel memory. 
+            </p>
+            <div class="mt-8">
+                <a href="#sections" class="inline-block bg-white text-primary font-medium px-8 py-4 rounded-full shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 text-lg">
+                    Let's Start <i class="fa fa-arrow-down ml-2 animate-bounce"></i>
+                </a>
+            </div>
+            
+            <!-- 装饰性滚动提示 -->
+            <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 flex flex-col items-center opacity-80">
+                <span class="text-sm mb-2"></span>
+                <i class="fa fa-chevron-down animate-bounce"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要内容区域 -->
+    <main id="content" class="py-20">
+        <div class="container mx-auto px-4">            
+            <!-- 三大板块 -->
+            <section id="sections" class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- 日常记录 -->
+                <div id="daily" class="card card-hover bg-white rounded-xl shadow-md overflow-hidden cursor-pointer" onclick="openSection('daily')">
+                    <div class="h-56 overflow-hidden">
+                        <img src="https://picsum.photos/seed/journal/600/400" alt="日常记录的图片，展示笔记本和笔" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110">
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center mb-4">
+                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-primary">
+                                <i class="fa fa-pencil text-xl"></i>
+                            </div>
+                            <h3 class="text-xl font-bold ml-3 text-gray-800">日常记录</h3>
+                        </div>
+                        <p class="text-gray-600 mb-4">
+                            记录生活中的所思所想，平凡日子里的小确幸，以及成长路上的每一步感悟。
+                        </p>
+                        <div class="inline-flex items-center text-primary font-medium hover:text-accent transition-colors">
+                            查看更多 <i class="fa fa-arrow-right ml-2"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 票据收藏 -->
+                <div id="tickets" class="card card-hover bg-white rounded-xl shadow-md overflow-hidden cursor-pointer" onclick="openSection('tickets')">
+                    <div class="h-56 overflow-hidden">
+                        <img src="https://picsum.photos/seed/tickets/600/400" alt="票据收藏的图片，展示各种车票、电影票等" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110">
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center mb-4">
+                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-primary">
+                                <i class="fa fa-ticket text-xl"></i>
+                            </div>
+                            <h3 class="text-xl font-bold ml-3 text-gray-800">票据收藏</h3>
+                        </div>
+                        <p class="text-gray-600 mb-4">
+                            收藏每一张承载回忆的票据，电影票、火车票、音乐会门票，每一张都有一个故事。
+                        </p>
+                        <div class="inline-flex items-center text-primary font-medium hover:text-accent transition-colors">
+                            查看更多 <i class="fa fa-arrow-right ml-2"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 旅游 -->
+                <div id="travel" class="card card-hover bg-white rounded-xl shadow-md overflow-hidden cursor-pointer" onclick="openSection('travel')">
+                    <div class="h-56 overflow-hidden">
+                        <img src="https://picsum.photos/seed/travel/600/400" alt="旅游照片，展示风景优美的景点" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110">
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center mb-4">
+                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-primary">
+                                <i class="fa fa-plane text-xl"></i>
+                            </div>
+                            <h3 class="text-xl font-bold ml-3 text-gray-800">旅游</h3>
+                        </div>
+                        <p class="text-gray-600 mb-4">
+                            记录每一次旅行的足迹，美丽的风景、有趣的人和事，定格旅途中的美好瞬间。
+                        </p>
+                        <div class="inline-flex items-center text-primary font-medium hover:text-accent transition-colors">
+                            查看更多 <i class="fa fa-arrow-right ml-2"></i>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- 板块详情页 -->
+    <div id="section-detail" class="fixed inset-0 bg-white z-50 transform translate-x-full transition-transform duration-300 overflow-y-auto">
+        <div class="container mx-auto px-4 py-20">
+            <!-- 详情页头部 -->
+            <div class="flex justify-between items-center mb-10">
+                <h2 id="detail-title" class="text-[clamp(1.8rem,5vw,2.5rem)] font-bold text-gray-800"></h2>
+                <button onclick="closeSection()" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-700 hover:bg-gray-200 transition-colors">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            
+            <!-- 上传区域 -->
+            <div class="bg-blue-50 rounded-xl p-6 mb-10">
+                <h3 class="text-xl font-semibold mb-4 text-gray-800">上传照片或视频</h3>
+                <div class="flex flex-col md:flex-row gap-4">
+                    <label for="file-upload" class="flex-grow border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary transition-colors cursor-pointer">
+                        <input id="file-upload" type="file" accept="image/*,video/*" multiple class="hidden" onchange="handleFileUpload(event)">
+                        <i class="fa fa-cloud-upload text-4xl text-gray-400 mb-2"></i>
+                        <p class="text-gray-600">点击或拖拽文件到此处上传</p>
+                        <p class="text-gray-400 text-sm mt-1">支持JPG、PNG、MP4等格式</p>
+                    </label>
+                    <div class="flex items-center">
+                        <button id="upload-btn" class="bg-primary hover:bg-accent text-white font-medium px-6 py-3 rounded-lg shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            确认上传 <i class="fa fa-upload ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="upload-preview" class="mt-6 flex flex-wrap gap-3"></div>
+            </div>
+            
+            <!-- 媒体浏览区域 -->
+            <div>
+                <h3 class="text-xl font-semibold mb-6 text-gray-800">已上传内容</h3>
+                <div id="media-gallery" class="media-container"></div>
+                <div id="empty-state" class="text-center py-16">
+                    <i class="fa fa-picture-o text-6xl text-gray-300 mb-4"></i>
+                    <p class="text-gray-500">暂无上传内容，请上传照片或视频</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 媒体查看模态框 -->
+    <div id="media-modal" class="modal fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+        <div class="modal-content bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+            <div class="relative">
+                <button onclick="closeMediaModal()" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/50 flex items-center justify-center text-white z-10 hover:bg-black/70 transition-colors">
+                    <i class="fa fa-times"></i>
+                </button>
+                <div id="modal-media-container" class="w-full h-[60vh] flex items-center justify-center">
+                    <!-- 媒体内容将在这里显示 -->
+                </div>
+                <div class="p-4">
+                    <h4 id="modal-media-name" class="font-medium text-gray-800"></h4>
+                    <p id="modal-media-date" class="text-gray-500 text-sm mt-1"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 返回顶部按钮 -->
+    <button id="back-to-top" class="fixed bottom-6 right-6 bg-primary text-white w-12 h-12 rounded-full shadow-lg flex items-center justify-center opacity-0 invisible transition-all duration-300 hover:bg-accent z-40">
+        <i class="fa fa-arrow-up"></i>
+    </button>
+
+    <!-- JavaScript -->
+    <script>
+        // 当前激活的板块
+        let activeSection = '';
+        // 存储上传的媒体文件
+        const mediaFiles = {
+            daily: [],
+            tickets: [],
+            travel: []
+        };
+        
+        // 初始化本地存储
+        function initLocalStorage() {
+            const savedData = localStorage.getItem('mediaFiles');
+            if (savedData) {
+                Object.assign(mediaFiles, JSON.parse(savedData));
+            }
+        }
+        
+        // 保存数据到本地存储
+        function saveToLocalStorage() {
+            localStorage.setItem('mediaFiles', JSON.stringify(mediaFiles));
+        }
+        
+        // 打开板块详情页
+        function openSection(section) {
+            activeSection = section;
+            const sectionTitles = {
+                daily: '日常记录',
+                tickets: '票据收藏',
+                travel: '旅游'
+            };
+            
+            // 设置标题
+            document.getElementById('detail-title').textContent = sectionTitles[section];
+            
+            // 加载媒体文件
+            loadMediaFiles(section);
+            
+            // 显示详情页
+            document.getElementById('section-detail').classList.remove('translate-x-full');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        // 关闭板块详情页
+        function closeSection() {
+            document.getElementById('section-detail').classList.add('translate-x-full');
+            document.body.style.overflow = '';
+            // 清空上传预览
+            document.getElementById('upload-preview').innerHTML = '';
+            document.getElementById('upload-btn').disabled = true;
+        }
+        
+        // 处理文件上传
+        function handleFileUpload(event) {
+            const files = event.target.files;
+            const previewContainer = document.getElementById('upload-preview');
+            previewContainer.innerHTML = '';
+            
+            if (files.length > 0) {
+                document.getElementById('upload-btn').disabled = false;
+                
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        const fileType = file.type.startsWith('image/') ? 'image' : 'video';
+                        const previewItem = document.createElement('div');
+                        previewItem.className = 'media-item rounded-lg overflow-hidden shadow-md w-24 h-24 relative';
+                        previewItem.dataset.fileIndex = i;
+                        
+                        if (fileType === 'image') {
+                            previewItem.innerHTML = `
+                                <img src="${e.target.result}" alt="预览图" class="w-full h-full object-cover">
+                                <button class="absolute top-1 right-1 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center text-xs hover:bg-red-600 transition-colors" onclick="removePreview(${i})">
+                                    <i class="fa fa-times"></i>
+                                </button>
+                            `;
+                        } else {
+                            previewItem.innerHTML = `
+                                <video src="${e.target.result}" class="w-full h-full object-cover" poster="https://picsum.photos/seed/video${i}/200/200"></video>
+                                <div class="video-overlay">
+                                    <i class="fa fa-play text-white"></i>
+                                </div>
+                                <button class="absolute top-1 right-1 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center text-xs hover:bg-red-600 transition-colors" onclick="removePreview(${i})">
+                                    <i class="fa fa-times"></i>
+                                </button>
+                            `;
+                        }
+                        
+                        previewContainer.appendChild(previewItem);
+                    };
+                    
+                    if (fileType === 'image') {
+                        reader.readAsDataURL(file);
+                    } else {
+                        reader.readAsDataURL(file);
+                    }
+                }
+            } else {
+                document.getElementById('upload-btn').disabled = true;
+            }
+        }
+        
+        // 移除预览文件
+        function removePreview(index) {
+            const previewItems = document.querySelectorAll('#upload-preview .media-item');
+            if (previewItems[index]) {
+                previewItems[index].remove();
+                
+                // 如果没有预览项了，禁用上传按钮
+                if (document.querySelectorAll('#upload-preview .media-item').length === 0) {
+                    document.getElementById('upload-btn').disabled = true;
+                }
+            }
+        }
+        
+        // 确认上传
+        document.getElementById('upload-btn').addEventListener('click', function() {
+            const fileInput = document.getElementById('file-upload');
+            const files = fileInput.files;
+            
+            if (files.length > 0 && activeSection) {
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        // 创建媒体对象
+                        const media = {
+                            id: Date.now() + i,
+                            type: file.type.startsWith('image/') ? 'image' : 'video',
+                            url: e.target.result,
+                            name: file.name,
+                            size: file.size,
+                            date: new Date().toISOString()
+                        };
+                        
+                        // 添加到媒体库
+                        mediaFiles[activeSection].push(media);
+                        
+                        // 保存到本地存储
+                        saveToLocalStorage();
+                        
+                        // 重新加载媒体文件
+                        loadMediaFiles(activeSection);
+                    };
+                    
+                    reader.readAsDataURL(file);
+                }
+                
+                // 清空上传区域
+                document.getElementById('upload-preview').innerHTML = '';
+                fileInput.value = '';
+                document.getElementById('upload-btn').disabled = true;
+                
+                // 显示成功提示
+                alert('上传成功！');
+            }
+        });
+        
+        // 加载媒体文件
+        function loadMediaFiles(section) {
+            const gallery = document.getElementById('media-gallery');
+            const emptyState = document.getElementById('empty-state');
+            gallery.innerHTML = '';
+            
+            const files = mediaFiles[section] || [];
+            
+            // 显示或隐藏空状态
+            if (files.length === 0) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                
+                // 按日期排序（最新的在前）
+                files.sort((a, b) => new Date(b.date) - new Date(a.date))
+                    .forEach(media => {
+                        const mediaItem = document.createElement('div');
+                        mediaItem.className = 'media-item rounded-lg overflow-hidden shadow-md cursor-pointer';
+                        mediaItem.dataset.mediaId = media.id;
+                        mediaItem.dataset.section = section;
+                        
+                        // 格式化日期
+                        const formattedDate = new Date(media.date).toLocaleString();
+                        
+                        if (media.type === 'image') {
+                            mediaItem.innerHTML = `
+                                <img src="${media.url}" alt="${media.name}" class="w-full h-24 object-cover">
+                                <div class="p-2 bg-gray-50">
+                                    <p class="text-xs text-gray-600 truncate">${media.name}</p>
+                                    <p class="text-xs text-gray-400">${formattedDate}</p>
+                                </div>
+                            `;
+                        } else {
+                            mediaItem.innerHTML = `
+                                <div class="relative">
+                                    <img src="https://picsum.photos/seed/${media.id}/200/200" alt="${media.name}" class="w-full h-24 object-cover">
+                                    <div class="video-overlay">
+                                        <i class="fa fa-play text-white"></i>
+                                    </div>
+                                </div>
+                                <div class="p-2 bg-gray-50">
+                                    <p class="text-xs text-gray-600 truncate">${media.name}</p>
+                                    <p class="text-xs text-gray-400">${formattedDate}</p>
+                                </div>
+                            `;
+                        }
+                        
+                        // 点击查看详情
+                        mediaItem.addEventListener('click', function() {
+                            openMediaModal(section, media.id);
+                        });
+                        
+                        gallery.appendChild(mediaItem);
+                    });
+            }
+        }
+        
+        // 打开媒体查看模态框
+        function openMediaModal(section, mediaId) {
+            const media = mediaFiles[section].find(m => m.id === mediaId);
+            const modal = document.getElementById('media-modal');
+            const mediaContainer = document.getElementById('modal-media-container');
+            
+            if (media) {
+                // 设置媒体内容
+                if (media.type === 'image') {
+                    mediaContainer.innerHTML = `
+                        <img src="${media.url}" alt="${media.name}" class="max-w-full max-h-full object-contain">
+                    `;
+                } else {
+                    mediaContainer.innerHTML = `
+                        <video src="${media.url}" controls class="max-w-full max-h-full object-contain">
+                            您的浏览器不支持视频播放
+                        </video>
+                    `;
+                }
+                
+                // 设置媒体信息
+                document.getElementById('modal-media-name').textContent = media.name;
+                document.getElementById('modal-media-date').textContent = new Date(media.date).toLocaleString();
+                
+                // 显示模态框
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+        
+        // 关闭媒体查看模态框
+        function closeMediaModal() {
+            const modal = document.getElementById('media-modal');
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        
+        // 移动端菜单切换
+        const menuToggle = document.getElementById('menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        menuToggle.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+        
+        // 导航栏滚动效果
+        const navbar = document.getElementById('navbar');
+        
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('py-2', 'bg-white/95', 'backdrop-blur', 'shadow-lg');
+                navbar.classList.remove('py-3', 'shadow-md');
+            } else {
+                navbar.classList.add('py-3', 'shadow-md');
+                navbar.classList.remove('py-2', 'bg-white/95', 'backdrop-blur', 'shadow-lg');
+            }
+        });
+        
+        // 返回顶部按钮
+        const backToTopButton = document.getElementById('back-to-top');
+        
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 500) {
+                backToTopButton.classList.remove('opacity-0', 'invisible');
+                backToTopButton.classList.add('opacity-100', 'visible');
+            } else {
+                backToTopButton.classList.add('opacity-0', 'invisible');
+                backToTopButton.classList.remove('opacity-100', 'visible');
+            }
+        });
+        
+        backToTopButton.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+        
+        // 导航链接点击后关闭移动菜单
+        const navLinks = document.querySelectorAll('.nav-link, #mobile-menu a');
+        
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                if (!mobileMenu.classList.contains('hidden')) {
+                    mobileMenu.classList.add('hidden');
+                }
+            });
+        });
+
+        // 平滑滚动到三大板块区域
+        document.querySelector('a[href="#sections"]').addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetSection = document.getElementById('sections');
+            
+            // 计算目标位置，考虑导航栏高度
+            const navbarHeight = document.getElementById('navbar').offsetHeight;
+            const targetPosition = targetSection.getBoundingClientRect().top + window.pageYOffset - navbarHeight;
+            
+            window.scrollTo({
+                top: targetPosition,
+                behavior: 'smooth'
+            });
+        });
+        
+        // 初始化
+        window.addEventListener('DOMContentLoaded', function() {
+            initLocalStorage();
+        });
+    </script>
+</body>
+</html>
